@@ -11,7 +11,9 @@ import org.beelinelibgdx.actors.ModelAndActorVisibilityContract;
 import org.beelinelibgdx.actors.NinePatchStyle;
 import org.beelinelibgdx.actors.NinePatchStyleBuilder;
 import org.beelinelibgdx.misslecommand.gamestate.GameState;
+import org.beelinelibgdx.misslecommand.gamestate.Missle;
 import org.beelinelibgdx.misslecommand.gamestate.PlayerBase;
+import org.beelinelibgdx.misslecommand.service.GameStateService;
 import org.beelinelibgdx.screens.BeelineScreen;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -19,9 +21,12 @@ import static com.google.common.collect.Lists.newArrayList;
 public class MissleCommandScreen extends BeelineScreen {
     private final GameState gameState;
     private final ModelAndActorVisibilityContract<PlayerBase, PlayerBaseActor> playerBasesContract;
+    private final ModelAndActorVisibilityContract<Missle, MissleActor> computerMisslesContract;
+    private final GameStateService gameStateService;
 
     public MissleCommandScreen(BeelineAssetManager assets, Viewport v, GameState gameState) {
         super(v);
+        this.gameStateService = new GameStateService();
         this.gameState = gameState;
 
         NinePatchStyle style = new NinePatchStyleBuilder().withTexture(() -> "square").build();
@@ -45,11 +50,26 @@ public class MissleCommandScreen extends BeelineScreen {
                 return playerBaseActor;
             }
         };
+
+        computerMisslesContract = new ModelAndActorVisibilityContract<Missle, MissleActor>(this.getRoot()   , gameState.computerMissles, newArrayList()) {
+            @Override
+            public void forEachFrame(Missle model, MissleActor actor) {
+                actor.setPosition(model.x, model.y, Align.center);
+            }
+            @Override
+            public MissleActor createActor(Missle model) {
+                MissleActor actor = new MissleActor(assets, model);
+                return actor;
+            }
+        };
     }
 
     @Override
     public void render(float delta) {
         super.render(delta);
+        gameStateService.eachFrame(gameState);
         playerBasesContract.refresh();
+        computerMisslesContract.refresh();
+
     }
 }
