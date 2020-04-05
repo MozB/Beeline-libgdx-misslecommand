@@ -1,6 +1,8 @@
 package org.beelinelibgdx.misslecommand;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
@@ -15,6 +17,7 @@ import org.beelinelibgdx.misslecommand.gamestate.Missle;
 import org.beelinelibgdx.misslecommand.gamestate.PlayerBase;
 import org.beelinelibgdx.misslecommand.service.GameStateService;
 import org.beelinelibgdx.screens.BeelineScreen;
+import org.beelinelibgdx.util.BeelineLogger;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -22,12 +25,26 @@ public class MissleCommandScreen extends BeelineScreen {
     private final GameState gameState;
     private final ModelAndActorVisibilityContract<PlayerBase, PlayerBaseActor> playerBasesContract;
     private final ModelAndActorVisibilityContract<Missle, MissleActor> computerMisslesContract;
+    private final ModelAndActorVisibilityContract<Missle, MissleActor> playerMisslesContract;
     private final GameStateService gameStateService;
 
     public MissleCommandScreen(BeelineAssetManager assets, Viewport v, GameState gameState) {
         super(v);
         this.gameStateService = new GameStateService();
         this.gameState = gameState;
+
+        BeelineActor background = new BeelineActor(assets.createSprite(() -> "square"),
+                MissleCommandGame.getWidth(), MissleCommandGame.getHeight());
+        background.setColor(Color.BLACK);
+        background.clearListeners();
+        background.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                gameStateService.generateNewPlayerMissle(gameState, x, y);
+                return false;
+            }
+        });
+        addActor(background);
 
         NinePatchStyle style = new NinePatchStyleBuilder().withTexture(() -> "square").build();
         BeelineNinePatch title = new BeelineNinePatch(assets.createNinePatchStyle(style), 630, 50,
@@ -51,7 +68,19 @@ public class MissleCommandScreen extends BeelineScreen {
             }
         };
 
-        computerMisslesContract = new ModelAndActorVisibilityContract<Missle, MissleActor>(this.getRoot()   , gameState.computerMissles, newArrayList()) {
+        computerMisslesContract = new ModelAndActorVisibilityContract<Missle, MissleActor>(this.getRoot(), gameState.computerMissles, newArrayList()) {
+            @Override
+            public void forEachFrame(Missle model, MissleActor actor) {
+                actor.setPosition(model.x, model.y, Align.center);
+            }
+            @Override
+            public MissleActor createActor(Missle model) {
+                MissleActor actor = new MissleActor(assets, model);
+                return actor;
+            }
+        };
+
+        playerMisslesContract = new ModelAndActorVisibilityContract<Missle, MissleActor>(this.getRoot(), gameState.playerMissles, newArrayList()) {
             @Override
             public void forEachFrame(Missle model, MissleActor actor) {
                 actor.setPosition(model.x, model.y, Align.center);
@@ -70,6 +99,6 @@ public class MissleCommandScreen extends BeelineScreen {
         gameStateService.eachFrame(gameState);
         playerBasesContract.refresh();
         computerMisslesContract.refresh();
-
+        playerMisslesContract.refresh();
     }
 }

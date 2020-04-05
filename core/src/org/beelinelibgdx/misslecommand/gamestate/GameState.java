@@ -10,6 +10,7 @@ public class GameState {
 
     public final List<PlayerBase> playerBases = newArrayList();
     public final List<Missle> computerMissles = newArrayList();
+    public final List<Missle> playerMissles = newArrayList();
 
     public GameState() {
         playerBases.add(new PlayerBase((MissleCommandGame.getWidth()/6) * 1, 0, 200, 50));

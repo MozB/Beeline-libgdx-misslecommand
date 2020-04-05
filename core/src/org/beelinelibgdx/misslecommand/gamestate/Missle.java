@@ -10,6 +10,8 @@ public class Missle implements VisibleModel {
 
     public float x;
     public float y;
+    public boolean stopped;
+
 
     public Missle(float speed, float x, float y, float xTarget, float yTarget) {
         this.speed = speed;

@@ -1,7 +1,5 @@
 package org.beelinelibgdx.misslecommand.service;
 
-import com.badlogic.gdx.math.MathUtils;
-
 import org.beelinelibgdx.misslecommand.MissleCommandGame;
 import org.beelinelibgdx.misslecommand.gamestate.GameState;
 import org.beelinelibgdx.misslecommand.gamestate.Missle;
@@ -15,23 +13,46 @@ public class GameStateService {
 
     public void eachFrame(GameState gameState) {
         if (random.nextInt(60 * 3) == 0) {
-            generateNewMissle(gameState);
+            generateNewComputerMissle(gameState);
         }
         for (Missle missle : gameState.computerMissles) {
             eachFrameMissle(missle);
         }
+        for (Missle missle : gameState.playerMissles) {
+            eachFrameMissle(missle);
+            eachFramePlayerMissle(gameState, missle);
+        }
+    }
+
+    private void eachFramePlayerMissle(GameState gameState, Missle missle) {
+        if (!missle.stopped && getDistance(missle.x, missle.y, missle.xTarget, missle.yTarget) <= missle.speed) {
+            // stop computer missles near our player missle
+            for (Missle computerMissle : gameState.computerMissles) {
+                if (getDistance(missle.x, missle.y, computerMissle.x, computerMissle.y) <= 200) {
+                    computerMissle.stopped = true;
+                }
+            }
+            // stop the player missle to make sure this only runs once
+            missle.stopped = true;
+        }
+    }
+
+    private float getDistance(float x1, float y1, float x2, float y2) {
+        return (float) Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
     }
 
     private void eachFrameMissle(Missle missle) {
-        float angleToTarget = getAngle(missle.x, missle.y, missle.xTarget, missle.yTarget);
+        if (!missle.stopped) {
+            float angleToTarget = getAngle(missle.x, missle.y, missle.xTarget, missle.yTarget);
 
-        // We have hypotenuse and angle, we can calculate the x, y delta from this
-        float adjacent = (float) (missle.speed * Math.cos(Math.toRadians(angleToTarget)));
-        float opposite = (float) (missle.speed * Math.sin(Math.toRadians(angleToTarget)));
+            // We have hypotenuse and angle, we can calculate the x, y delta from this
+            float adjacent = (float) (missle.speed * Math.cos(Math.toRadians(angleToTarget)));
+            float opposite = (float) (missle.speed * Math.sin(Math.toRadians(angleToTarget)));
 
-        // move our missle a small amount in the direction of target
-        missle.x += adjacent;
-        missle.y += opposite;
+            // move our missle a small amount in the direction of target
+            missle.x += adjacent;
+            missle.y += opposite;
+        }
     }
 
     private float getAngle(float x1, float y1, float x2, float y2) {
@@ -44,7 +65,18 @@ public class GameStateService {
         return angle;
     }
 
-    private void generateNewMissle(GameState gameState) {
+    public void generateNewPlayerMissle(GameState gameState, float targetX, float targetY) {
+        float speed = 6;
+
+        // start our missle at the bottom middle of the screen
+        float startX = MissleCommandGame.getWidth() / 2;
+        float startY = 0;
+
+        Missle missle = new Missle(speed, startX, startY, targetX, targetY);
+        gameState.playerMissles.add(missle);
+    }
+
+    private void generateNewComputerMissle(GameState gameState) {
         float speed = random.nextFloat()*2 + 1;
 
         // start our missle at a random location at the top of the screen
