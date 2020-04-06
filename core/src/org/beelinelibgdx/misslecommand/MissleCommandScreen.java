@@ -76,6 +76,7 @@ public class MissleCommandScreen extends BeelineScreen {
             @Override
             public MissleActor createActor(Missle model) {
                 MissleActor actor = new MissleActor(assets, model);
+                model.missleEventListeners.add(actor);
                 return actor;
             }
         };
@@ -88,6 +89,7 @@ public class MissleCommandScreen extends BeelineScreen {
             @Override
             public MissleActor createActor(Missle model) {
                 MissleActor actor = new MissleActor(assets, model);
+                model.missleEventListeners.add(actor);
                 return actor;
             }
         };

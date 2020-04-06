@@ -2,6 +2,10 @@ package org.beelinelibgdx.misslecommand.gamestate;
 
 import org.beelinelibgdx.actors.VisibleModel;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+
 public class Missle implements VisibleModel {
 
     public final float speed;
@@ -11,6 +15,8 @@ public class Missle implements VisibleModel {
     public float x;
     public float y;
     public boolean stopped;
+
+    public List<MissleEventListener> missleEventListeners = newArrayList();
 
 
     public Missle(float speed, float x, float y, float xTarget, float yTarget) {

@@ -5,7 +5,10 @@ import org.beelinelibgdx.misslecommand.gamestate.GameState;
 import org.beelinelibgdx.misslecommand.gamestate.Missle;
 import org.beelinelibgdx.misslecommand.gamestate.PlayerBase;
 
+import java.util.List;
 import java.util.Random;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 public class GameStateService {
 
@@ -17,6 +20,7 @@ public class GameStateService {
         }
         for (Missle missle : gameState.computerMissles) {
             eachFrameMissle(missle);
+            eachFrameComputerMissle(gameState, missle);
         }
         for (Missle missle : gameState.playerMissles) {
             eachFrameMissle(missle);
@@ -24,16 +28,26 @@ public class GameStateService {
         }
     }
 
+    private void eachFrameComputerMissle(GameState gameState, Missle missle) {
+        if (!missle.stopped && getDistance(missle.x, missle.y, missle.xTarget, missle.yTarget) <= missle.speed) {
+            // stop the player missle to make sure this only runs once
+            missle.stopped = true;
+            missle.missleEventListeners.stream().forEach(i -> i.onMissleReachedTarget(missle));
+        }
+    }
+
     private void eachFramePlayerMissle(GameState gameState, Missle missle) {
         if (!missle.stopped && getDistance(missle.x, missle.y, missle.xTarget, missle.yTarget) <= missle.speed) {
             // stop computer missles near our player missle
             for (Missle computerMissle : gameState.computerMissles) {
-                if (getDistance(missle.x, missle.y, computerMissle.x, computerMissle.y) <= 200) {
+                if (getDistance(missle.x, missle.y, computerMissle.x, computerMissle.y) <= 100) {
+                    computerMissle.missleEventListeners.stream().forEach(i -> i.onMissleDestroyed(computerMissle));
                     computerMissle.stopped = true;
                 }
             }
             // stop the player missle to make sure this only runs once
             missle.stopped = true;
+            missle.missleEventListeners.stream().forEach(i -> i.onMissleReachedTarget(missle));
         }
     }
 
