@@ -5,10 +5,7 @@ import org.beelinelibgdx.misslecommand.gamestate.GameState;
 import org.beelinelibgdx.misslecommand.gamestate.Missle;
 import org.beelinelibgdx.misslecommand.gamestate.PlayerBase;
 
-import java.util.List;
 import java.util.Random;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 public class GameStateService {
 
@@ -40,7 +37,7 @@ public class GameStateService {
         if (!missle.stopped && getDistance(missle.x, missle.y, missle.xTarget, missle.yTarget) <= missle.speed) {
             // stop computer missles near our player missle
             for (Missle computerMissle : gameState.computerMissles) {
-                if (getDistance(missle.x, missle.y, computerMissle.x, computerMissle.y) <= 100) {
+                if (!computerMissle.stopped && getDistance(missle.x, missle.y, computerMissle.x, computerMissle.y) <= 100) {
                     computerMissle.missleEventListeners.stream().forEach(i -> i.onMissleDestroyed(computerMissle));
                     computerMissle.stopped = true;
                 }
@@ -51,7 +48,7 @@ public class GameStateService {
         }
     }
 
-    private float getDistance(float x1, float y1, float x2, float y2) {
+    public static float getDistance(float x1, float y1, float x2, float y2) {
         return (float) Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
     }
 
@@ -69,7 +66,7 @@ public class GameStateService {
         }
     }
 
-    private float getAngle(float x1, float y1, float x2, float y2) {
+    public static float getAngle(float x1, float y1, float x2, float y2) {
         float angle = (float) Math.toDegrees(Math.atan2(y2 - y1, x2 - x1));
 
         if(angle < 0){

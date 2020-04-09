@@ -17,7 +17,6 @@ import org.beelinelibgdx.misslecommand.gamestate.Missle;
 import org.beelinelibgdx.misslecommand.gamestate.PlayerBase;
 import org.beelinelibgdx.misslecommand.service.GameStateService;
 import org.beelinelibgdx.screens.BeelineScreen;
-import org.beelinelibgdx.util.BeelineLogger;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -72,10 +71,11 @@ public class MissleCommandScreen extends BeelineScreen {
             @Override
             public void forEachFrame(Missle model, MissleActor actor) {
                 actor.setPosition(model.x, model.y, Align.center);
+                actor.refreshLine();
             }
             @Override
             public MissleActor createActor(Missle model) {
-                MissleActor actor = new MissleActor(assets, model);
+                MissleActor actor = new MissleActor(assets, model, Color.RED);
                 model.missleEventListeners.add(actor);
                 return actor;
             }
@@ -85,10 +85,11 @@ public class MissleCommandScreen extends BeelineScreen {
             @Override
             public void forEachFrame(Missle model, MissleActor actor) {
                 actor.setPosition(model.x, model.y, Align.center);
+                actor.refreshLine();
             }
             @Override
             public MissleActor createActor(Missle model) {
-                MissleActor actor = new MissleActor(assets, model);
+                MissleActor actor = new MissleActor(assets, model, Color.YELLOW);
                 model.missleEventListeners.add(actor);
                 return actor;
             }
