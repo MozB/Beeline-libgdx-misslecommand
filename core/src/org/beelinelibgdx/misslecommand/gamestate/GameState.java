@@ -2,8 +2,8 @@ package org.beelinelibgdx.misslecommand.gamestate;
 
 import org.beelinelibgdx.misslecommand.MissleCommandGame;
 
-import java.util.Collection;
 import java.util.List;
+
 import static com.google.common.collect.Lists.newArrayList;
 
 public class GameState {
@@ -11,6 +11,9 @@ public class GameState {
     public final List<PlayerBase> playerBases = newArrayList();
     public final List<Missle> computerMissles = newArrayList();
     public final List<Missle> playerMissles = newArrayList();
+    public final List<GameStateListener> gameStateListeners = newArrayList();
+
+    public boolean gameOver;
 
     public GameState() {
         playerBases.add(new PlayerBase((MissleCommandGame.getWidth()/6) * 1, 0, 200, 50));

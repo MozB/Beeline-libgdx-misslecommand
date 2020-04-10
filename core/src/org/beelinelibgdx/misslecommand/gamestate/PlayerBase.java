@@ -2,13 +2,19 @@ package org.beelinelibgdx.misslecommand.gamestate;
 
 import org.beelinelibgdx.actors.VisibleModel;
 
+import java.awt.Menu;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+
 public class PlayerBase implements VisibleModel {
     public final int x;
     public final int y;
     public final int width;
     public final int height;
+    public final List<PlayerBaseListener> playerBaseListeners = newArrayList();
 
-    private int health = 1;
+    public int health = 1;
 
     public PlayerBase(int x, int y, int width, int height) {
         this.x = x;

@@ -30,6 +30,25 @@ public class GameStateService {
             // stop the player missle to make sure this only runs once
             missle.stopped = true;
             missle.missleEventListeners.stream().forEach(i -> i.onMissleReachedTarget(missle));
+
+            // check if any player bases are hit
+            for (PlayerBase playerBase : gameState.playerBases) {
+                if (    missle.x > playerBase.x - playerBase.width/2
+                        && missle.x < playerBase.x + playerBase.width/2
+                        && missle.y > playerBase.y - playerBase.height/2
+                        && missle.y < playerBase.y + playerBase.height/2) {
+                    // decrement health, and destroy playerbase if health == 0
+                    if (--playerBase.health == 0) {
+                        playerBase.playerBaseListeners.stream().forEach(i -> i.onPlayerBaseDestroyed());
+                    }
+                }
+            }
+
+            // check if there are no player bases left undestroyed
+            if (!gameState.playerBases.stream().filter(i -> i.health > 0).findAny().isPresent()) {
+                gameState.gameOver = true;
+                gameState.gameStateListeners.stream().forEach(i -> i.onGameOver());
+            }
         }
     }
 
