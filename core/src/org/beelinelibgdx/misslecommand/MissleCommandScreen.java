@@ -1,6 +1,7 @@
 package org.beelinelibgdx.misslecommand;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import org.beelinelibgdx.actors.BeelineActor;
 import org.beelinelibgdx.actors.BeelineAssetManager;
+import org.beelinelibgdx.actors.BeelineLabel;
 import org.beelinelibgdx.actors.BeelineNinePatch;
 import org.beelinelibgdx.actors.ModelAndActorVisibilityContract;
 import org.beelinelibgdx.actors.NinePatchStyle;
@@ -29,6 +31,8 @@ public class MissleCommandScreen extends BeelineScreen implements GameStateListe
     private final ModelAndActorVisibilityContract<Missle, MissleActor> playerMisslesContract;
     private final GameStateService gameStateService;
     private final BeelineAssetManager assets;
+    private final BeelineLabel scoreLabel;
+    private final BeelineActor cannon;
 
     public MissleCommandScreen(BeelineAssetManager assets, Viewport v, GameState gameState) {
         super(v);
@@ -100,6 +104,17 @@ public class MissleCommandScreen extends BeelineScreen implements GameStateListe
                 return actor;
             }
         };
+
+        scoreLabel = new BeelineLabel("", assets.getSkin());
+        scoreLabel.setFontScale(0.6f);
+        addActor(scoreLabel);
+        onScoreChanged(0);
+
+        cannon = new BeelineActor(assets.createSprite(() -> "square"), 25, 200);
+        cannon.setOrigin(cannon.getWidth()/2, 100);
+        cannon.setColor(Color.YELLOW);
+        cannon.setPosition(getWidth()/2, -100, Align.bottom);
+        addActor(cannon);
     }
 
     @Override
@@ -126,5 +141,23 @@ public class MissleCommandScreen extends BeelineScreen implements GameStateListe
                 Actions.fadeIn(1)
         ));
         addActor(gameOverGroup);
+    }
+
+    @Override
+    public void onScoreChanged(int scoreDelta) {
+        scoreLabel.setText("Score: " + gameState.score);
+        scoreLabel.setPositionAndResize(10, getHeight()-10, Align.topLeft);
+    }
+
+    @Override
+    public void onPlayerMissleFired(Missle missle) {
+        float lineAngle = GameStateService.getAngle(missle.xStart, missle.yStart, missle.xTarget, missle.yTarget);
+        cannon.setRotation(lineAngle - 90);
+        cannon.addAction(
+                Actions.sequence(
+                        Actions.sizeTo(cannon.getWidth(), 100, 0.2f),
+                        Actions.sizeTo(cannon.getWidth(), 200, 0.8f, Interpolation.sineOut)
+                )
+        );
     }
 }

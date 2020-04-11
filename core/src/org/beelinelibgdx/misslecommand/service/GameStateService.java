@@ -23,6 +23,10 @@ public class GameStateService {
             eachFrameMissle(missle);
             eachFramePlayerMissle(gameState, missle);
         }
+
+        if (gameState.reloadFramesRemaining > 0) {
+            gameState.reloadFramesRemaining--;
+        }
     }
 
     private void eachFrameComputerMissle(GameState gameState, Missle missle) {
@@ -54,13 +58,20 @@ public class GameStateService {
 
     private void eachFramePlayerMissle(GameState gameState, Missle missle) {
         if (!missle.stopped && getDistance(missle.x, missle.y, missle.xTarget, missle.yTarget) <= missle.speed) {
+            int computerMisslesRemoved = 0;
             // stop computer missles near our player missle
             for (Missle computerMissle : gameState.computerMissles) {
                 if (!computerMissle.stopped && getDistance(missle.x, missle.y, computerMissle.x, computerMissle.y) <= 100) {
                     computerMissle.missleEventListeners.stream().forEach(i -> i.onMissleDestroyed(computerMissle));
                     computerMissle.stopped = true;
+                    computerMisslesRemoved++;
                 }
             }
+            // calculate our score delta to add
+            int scoreDelta = (int) (10 * Math.pow(computerMisslesRemoved, 2));
+            gameState.score += scoreDelta;
+            gameState.gameStateListeners.forEach(i -> i.onScoreChanged(scoreDelta));
+
             // stop the player missle to make sure this only runs once
             missle.stopped = true;
             missle.missleEventListeners.stream().forEach(i -> i.onMissleReachedTarget(missle));
@@ -96,14 +107,18 @@ public class GameStateService {
     }
 
     public void generateNewPlayerMissle(GameState gameState, float targetX, float targetY) {
-        float speed = 6;
+        if (gameState.reloadFramesRemaining == 0) {
+            float speed = 6;
 
-        // start our missle at the bottom middle of the screen
-        float startX = MissleCommandGame.getWidth() / 2;
-        float startY = 0;
+            // start our missle at the bottom middle of the screen
+            float startX = MissleCommandGame.getWidth() / 2;
+            float startY = 0;
 
-        Missle missle = new Missle(speed, startX, startY, targetX, targetY);
-        gameState.playerMissles.add(missle);
+            Missle missle = new Missle(speed, startX, startY, targetX, targetY);
+            gameState.playerMissles.add(missle);
+            gameState.reloadFramesRemaining = 60;
+            gameState.gameStateListeners.forEach(i -> i.onPlayerMissleFired(missle));
+        }
     }
 
     private void generateNewComputerMissle(GameState gameState) {

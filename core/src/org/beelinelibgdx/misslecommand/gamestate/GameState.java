@@ -14,6 +14,8 @@ public class GameState {
     public final List<GameStateListener> gameStateListeners = newArrayList();
 
     public boolean gameOver;
+    public int score;
+    public int reloadFramesRemaining;
 
     public GameState() {
         playerBases.add(new PlayerBase((MissleCommandGame.getWidth()/6) * 1, 0, 200, 50));
